@@ -18,8 +18,9 @@
   let showImageSelector = $state(false);
 
   async function fetchBucketImages() {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
     try {
-      const res = await fetch('http://127.0.0.1:5000/api/images');
+      const res = await fetch(`${API_URL}/api/images`);
       const data = await res.json();
       if (data.images) {
         bucketImages = data.images;
@@ -155,8 +156,9 @@
   }
 
   async function saveToServer() {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/portfolio', {
+      const response = await fetch(`${API_URL}/api/portfolio`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(projects)
@@ -316,7 +318,7 @@
             showImageSelector = false; 
           }}
         >
-          <img src={`http://127.0.0.1:5000/images/${img}`} alt={img} />
+          <img src={`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/images/${img}`} alt={img} />
           <div class="image-name">{img}</div>
         </div>
       {/each}

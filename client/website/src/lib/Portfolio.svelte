@@ -34,7 +34,8 @@
   }
 
   function getImageUrl(img) {
-    return img.startsWith('http') ? img : `http://127.0.0.1:5000/images/${img}`;
+    const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+    return img.startsWith('http') ? img : `${API_URL}/images/${img}`;
   }
 </script>
 
