@@ -206,8 +206,7 @@
     }
   }
 
-  async function saveToServer() {
-    isSaving = true;
+  export async function saveToServer() {
     const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
     try {
       const response = await fetch(`${API_URL}/api/portfolio`, {
@@ -217,15 +216,11 @@
       });
       
       const result = await response.json();
-      if (result.success) {
-        ontoast?.({ type: 'success', message: 'Saved portfolio to server successfully' });
-      } else {
-        ontoast?.({ type: 'error', message: 'Server error: ' + result.error });
+      if (!result.success) {
+        throw new Error(result.error);
       }
     } catch (err) {
-      ontoast?.({ type: 'error', message: 'Failed to connect to server' });
-    } finally {
-      isSaving = false;
+      throw err;
     }
   }
 </script>
@@ -239,21 +234,10 @@
         <p class="pm-subtitle">{projects.length} project{projects.length !== 1 ? 's' : ''}</p>
       </div>
       <div class="pm-header-actions">
-        <button class="btn-primary" onclick={saveToServer} disabled={isSaving}>
-          {#if isSaving}
-            <span class="spinner"></span> Saving...
-          {:else}
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-              <polyline points="17 21 17 13 7 13 7 21"/>
-              <polyline points="7 3 7 8 15 8"/>
-            </svg>
-            Save to Server
-          {/if}
-        </button>
         <button class="btn-success" onclick={openAddPanel}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 5v14"/><path d="M5 12h14"/>
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
           Add Project
         </button>

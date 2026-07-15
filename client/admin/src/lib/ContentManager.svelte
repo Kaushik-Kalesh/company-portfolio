@@ -76,8 +76,7 @@
     }
   }
 
-  async function saveToServer() {
-    isSaving = true;
+  export async function saveToServer() {
     const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
     try {
       const response = await fetch(`${API_URL}/api/content`, {
@@ -90,14 +89,11 @@
       if (result.success) {
         pendingChanges = {}; // clear pending since saved to server
         contentData = JSON.parse(JSON.stringify(content)); // Update base truth
-        ontoast?.({ type: 'success', message: 'Saved to server successfully' });
       } else {
-        ontoast?.({ type: 'error', message: 'Server error: ' + result.error });
+        throw new Error(result.error);
       }
     } catch (err) {
-      ontoast?.({ type: 'error', message: 'Failed to connect to server' });
-    } finally {
-      isSaving = false;
+      throw err;
     }
   }
 
@@ -122,21 +118,6 @@
             Revert All
           </button>
         {/if}
-        <button class="btn-primary" onclick={saveToServer} disabled={pendingCount === 0 || isSaving}>
-          {#if isSaving}
-            <span class="spinner"></span> Saving...
-          {:else}
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-              <polyline points="17 21 17 13 7 13 7 21"/>
-              <polyline points="7 3 7 8 15 8"/>
-            </svg>
-            Save to Server
-            {#if pendingCount > 0}
-              <span class="pending-badge">{pendingCount}</span>
-            {/if}
-          {/if}
-        </button>
       </div>
     </div>
 
