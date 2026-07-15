@@ -39,8 +39,6 @@
             <span data-content-id="footer_copyright"
                 >{content.footer_copyright}</span
             >
-            <span class="footer-separator">·</span>
-            <span>Built with precision.</span>
         </div>
     </div>
 </footer>
