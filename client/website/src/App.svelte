@@ -6,7 +6,14 @@
   import Contact from './lib/Contact.svelte';
   import Footer from './lib/Footer.svelte';
   import WhatsAppFab from './lib/WhatsAppFab.svelte';
+  import content from '../../data/content.json';
 </script>
+
+<svelte:head>
+  <title>{content.companyName} — Custom Software & Digital Marketing</title>
+  <meta name="description" content="{content.companyName} builds custom software solutions and delivers digital marketing that scales your business. From CRMs to AI infrastructure — if you can dream it, we can build it." />
+  <meta property="og:title" content="{content.companyName} — Custom Software & Digital Marketing" />
+</svelte:head>
 
 <Navbar />
 

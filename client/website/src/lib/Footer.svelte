@@ -6,7 +6,7 @@
     <div class="container">
         <div class="footer-inner">
             <div class="footer-brand">
-                <div class="footer-logo">CPL</div>
+                <div class="footer-logo">{content.companyName}</div>
                 <p class="footer-tagline" data-content-id="footer_tagline">
                     {content.footer_tagline}
                 </p>

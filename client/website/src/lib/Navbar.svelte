@@ -1,4 +1,5 @@
 <script>
+  import content from '../../../data/content.json';
   let scrolled = $state(false);
   let mobileMenuOpen = $state(false);
 
@@ -22,7 +23,7 @@
 <nav class="navbar" class:scrolled>
   <div class="navbar-inner">
     <a href="#hero" class="nav-logo" onclick={(e) => { e.preventDefault(); smoothScroll('#hero'); }}>
-      CPL
+      {content.companyName}
     </a>
 
     <div class="nav-links" class:open={mobileMenuOpen}>
