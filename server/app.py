@@ -1,7 +1,7 @@
 import os
 import json
 import requests
-from flask import Flask, request, jsonify, redirect, send_from_directory
+from flask import Flask, request, jsonify, redirect
 from flask_cors import CORS
 import smtplib
 from email.mime.text import MIMEText
@@ -14,10 +14,6 @@ load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
-
-DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data'))
-IMAGES_DIR = os.path.join(DATA_DIR, 'images')
-os.makedirs(IMAGES_DIR, exist_ok=True)
 
 # R2 Configuration
 R2_ACCOUNT_ID = os.getenv('R2_ACCOUNT_ID')
@@ -38,16 +34,18 @@ if R2_ACCOUNT_ID and R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY:
 
 def trigger_vercel():
     if VERCEL_WEBHOOK_URL:
-        try:
-            requests.post(VERCEL_WEBHOOK_URL)
-            print("Triggered Vercel rebuild")
-        except Exception as e:
-            print(f"Failed to trigger Vercel webhook: {e}")
+        urls = VERCEL_WEBHOOK_URL.split(',')
+        for url in urls:
+            try:
+                requests.post(url.strip())
+                print(f"Triggered Vercel rebuild for {url.strip()}")
+            except Exception as e:
+                print(f"Failed to trigger Vercel webhook {url.strip()}: {e}")
 
 @app.route('/images/<path:filename>')
 def serve_image(filename):
     if not s3:
-        return send_from_directory(IMAGES_DIR, filename)
+        return jsonify({'error': 'R2 not configured'}), 500
     
     if R2_PUBLIC_URL:
         return redirect(f"{R2_PUBLIC_URL}/images/{filename}")
@@ -61,12 +59,7 @@ def serve_image(filename):
 @app.route('/api/images', methods=['GET'])
 def list_images():
     if not s3:
-        # Read local images
-        try:
-            images = os.listdir(IMAGES_DIR)
-            return jsonify({'images': images})
-        except:
-            return jsonify({'images': []})
+        return jsonify({'error': 'R2 not configured'}), 500
             
     try:
         response = s3.list_objects_v2(Bucket=R2_BUCKET_NAME, Prefix='images/')
@@ -85,11 +78,7 @@ def get_data(filename):
         return jsonify({'error': 'Invalid file'}), 400
         
     if not s3:
-        try:
-            with open(os.path.join(DATA_DIR, filename), 'r') as f:
-                return jsonify(json.load(f))
-        except:
-            return jsonify({'error': 'Local data not found'}), 404
+        return jsonify({'error': 'R2 not configured'}), 500
             
     try:
         response = s3.get_object(Bucket=R2_BUCKET_NAME, Key=filename)
@@ -134,12 +123,7 @@ def handle_contact():
 @app.route('/api/content', methods=['POST'])
 def save_content():
     if not s3:
-        try:
-            with open(os.path.join(DATA_DIR, 'content.json'), 'w') as f:
-                json.dump(request.json, f, indent=2)
-            return jsonify({'success': True})
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'R2 not configured'}), 500
             
     try:
         data = json.dumps(request.json, indent=2)
@@ -152,12 +136,7 @@ def save_content():
 @app.route('/api/portfolio', methods=['POST'])
 def save_portfolio():
     if not s3:
-        try:
-            with open(os.path.join(DATA_DIR, 'portfolio.json'), 'w') as f:
-                json.dump(request.json, f, indent=2)
-            return jsonify({'success': True})
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'R2 not configured'}), 500
             
     try:
         data = json.dumps(request.json, indent=2)
