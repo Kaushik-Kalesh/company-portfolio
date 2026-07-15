@@ -298,15 +298,26 @@
   }
 
   .modal-content {
-    position: relative;
+    background: var(--color-surface);
     width: 100%;
-    max-width: 700px;
+    max-width: 800px;
     max-height: 90vh;
+    border-radius: 24px;
     overflow-y: auto;
-    background: var(--color-bg);
-    padding: 0;
-    border-radius: 16px;
+    overflow-x: hidden;
+    position: relative;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    
+    /* Hide scrollbar for IE, Edge and Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
     animation: slideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .modal-content::-webkit-scrollbar {
+    display: none;
   }
 
   .modal-close {
