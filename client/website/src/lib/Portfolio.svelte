@@ -298,11 +298,12 @@
   }
 
   .modal-content {
-    background: var(--color-surface);
+    background: var(--color-bg);
+    padding: 0;
     width: 100%;
     max-width: 800px;
     max-height: 90vh;
-    border-radius: 24px;
+    border-radius: 16px;
     overflow-y: auto;
     overflow-x: hidden;
     position: relative;
