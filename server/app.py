@@ -1,0 +1,171 @@
+import os
+import json
+import requests
+from flask import Flask, request, jsonify, redirect, send_from_directory
+from flask_cors import CORS
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from dotenv import load_dotenv
+import boto3
+from botocore.config import Config
+
+load_dotenv()
+
+app = Flask(__name__)
+CORS(app)
+
+DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data'))
+IMAGES_DIR = os.path.join(DATA_DIR, 'images')
+os.makedirs(IMAGES_DIR, exist_ok=True)
+
+# R2 Configuration
+R2_ACCOUNT_ID = os.getenv('R2_ACCOUNT_ID')
+R2_ACCESS_KEY_ID = os.getenv('R2_ACCESS_KEY_ID')
+R2_SECRET_ACCESS_KEY = os.getenv('R2_SECRET_ACCESS_KEY')
+R2_BUCKET_NAME = os.getenv('R2_BUCKET_NAME')
+R2_PUBLIC_URL = os.getenv('R2_PUBLIC_URL') # e.g., https://pub-xxxx.r2.dev
+VERCEL_WEBHOOK_URL = os.getenv('VERCEL_WEBHOOK_URL')
+
+s3 = None
+if R2_ACCOUNT_ID and R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY:
+    s3 = boto3.client('s3',
+        endpoint_url=f'https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com',
+        aws_access_key_id=R2_ACCESS_KEY_ID,
+        aws_secret_access_key=R2_SECRET_ACCESS_KEY,
+        config=Config(signature_version='s3v4')
+    )
+
+def trigger_vercel():
+    if VERCEL_WEBHOOK_URL:
+        try:
+            requests.post(VERCEL_WEBHOOK_URL)
+            print("Triggered Vercel rebuild")
+        except Exception as e:
+            print(f"Failed to trigger Vercel webhook: {e}")
+
+@app.route('/images/<path:filename>')
+def serve_image(filename):
+    if not s3:
+        return send_from_directory(IMAGES_DIR, filename)
+    
+    if R2_PUBLIC_URL:
+        return redirect(f"{R2_PUBLIC_URL}/images/{filename}")
+        
+    try:
+        response = s3.get_object(Bucket=R2_BUCKET_NAME, Key=f"images/{filename}")
+        return response['Body'].read(), 200, {'Content-Type': response['ContentType']}
+    except Exception as e:
+        return jsonify({'error': str(e)}), 404
+
+@app.route('/api/images', methods=['GET'])
+def list_images():
+    if not s3:
+        # Read local images
+        try:
+            images = os.listdir(IMAGES_DIR)
+            return jsonify({'images': images})
+        except:
+            return jsonify({'images': []})
+            
+    try:
+        response = s3.list_objects_v2(Bucket=R2_BUCKET_NAME, Prefix='images/')
+        images = []
+        if 'Contents' in response:
+            for item in response['Contents']:
+                if item['Key'] != 'images/':
+                    images.append(item['Key'].replace('images/', ''))
+        return jsonify({'images': images})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/data/<filename>', methods=['GET'])
+def get_data(filename):
+    if filename not in ['content.json', 'portfolio.json']:
+        return jsonify({'error': 'Invalid file'}), 400
+        
+    if not s3:
+        try:
+            with open(os.path.join(DATA_DIR, filename), 'r') as f:
+                return jsonify(json.load(f))
+        except:
+            return jsonify({'error': 'Local data not found'}), 404
+            
+    try:
+        response = s3.get_object(Bucket=R2_BUCKET_NAME, Key=filename)
+        data = json.loads(response['Body'].read().decode('utf-8'))
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/contact', methods=['POST'])
+def handle_contact():
+    data = request.json
+    email = data.get('email')
+    reason = data.get('reason')
+    remarks = data.get('remarks')
+    
+    sender_email = os.getenv('GMAIL_USER', 'kaushikkalesh@gmail.com')
+    app_password = os.getenv('GMAIL_APP_PASSWORD')
+    
+    if not app_password:
+        return jsonify({'error': 'Email configuration missing on server (App Password).'}), 500
+        
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = 'kaushikkalesh@gmail.com'
+        msg['Subject'] = f"New CPL Contact Request: {reason.capitalize()}"
+        
+        body = f"You received a new message from your website.\n\nSender Email: {email}\nReason: {reason}\nRemarks:\n{remarks}"
+        msg.attach(MIMEText(body, 'plain'))
+        
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(sender_email, app_password)
+        server.send_message(msg)
+        server.quit()
+        
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        print(f"Error sending email: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/content', methods=['POST'])
+def save_content():
+    if not s3:
+        try:
+            with open(os.path.join(DATA_DIR, 'content.json'), 'w') as f:
+                json.dump(request.json, f, indent=2)
+            return jsonify({'success': True})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+            
+    try:
+        data = json.dumps(request.json, indent=2)
+        s3.put_object(Bucket=R2_BUCKET_NAME, Key='content.json', Body=data, ContentType='application/json')
+        trigger_vercel()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/portfolio', methods=['POST'])
+def save_portfolio():
+    if not s3:
+        try:
+            with open(os.path.join(DATA_DIR, 'portfolio.json'), 'w') as f:
+                json.dump(request.json, f, indent=2)
+            return jsonify({'success': True})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+            
+    try:
+        data = json.dumps(request.json, indent=2)
+        s3.put_object(Bucket=R2_BUCKET_NAME, Key='portfolio.json', Body=data, ContentType='application/json')
+        trigger_vercel()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(port=5000, debug=True)
