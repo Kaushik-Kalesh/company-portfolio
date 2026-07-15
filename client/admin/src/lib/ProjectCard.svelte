@@ -63,9 +63,15 @@
     </div>
   {/if}
 
-  {#if project.image}
-    <div class="project-image-preview">
-      <img src={project.image} alt="{project.name} preview" />
+  {#if project.images && project.images.length > 0}
+    <div class="project-image-carousel">
+      {#each project.images as img}
+        <img src="{import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/images/{img}" alt="{project.name} preview" />
+      {/each}
+    </div>
+  {:else if project.image}
+    <div class="project-image-carousel">
+      <img src="{import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/images/{project.image}" alt="{project.name} preview" />
     </div>
   {/if}
 </div>
@@ -144,17 +150,28 @@
     gap: 0.375rem;
   }
 
-  .project-image-preview {
+  .project-image-carousel {
     margin-top: 0.75rem;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    border: 1px solid var(--color-border);
+    display: flex;
+    overflow-x: auto;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem; /* for scrollbar */
   }
 
-  .project-image-preview img {
-    width: 100%;
+  .project-image-carousel::-webkit-scrollbar {
+    height: 4px;
+  }
+  .project-image-carousel::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 4px;
+  }
+
+  .project-image-carousel img {
     height: 120px;
+    width: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
     object-fit: cover;
-    display: block;
+    flex-shrink: 0;
   }
 </style>

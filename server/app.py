@@ -9,6 +9,8 @@ from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 import boto3
 from botocore.config import Config
+from werkzeug.utils import secure_filename
+import time
 
 load_dotenv()
 
@@ -71,6 +73,34 @@ def list_images():
         return jsonify({'images': images})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/upload-image', methods=['POST'])
+def upload_image():
+    if not s3:
+        return jsonify({'error': 'R2 not configured'}), 500
+        
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image provided'}), 400
+        
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+        
+    if file:
+        filename = secure_filename(file.filename)
+        base, ext = os.path.splitext(filename)
+        unique_filename = f"{base}_{int(time.time())}{ext}"
+        
+        try:
+            s3.upload_fileobj(
+                file,
+                R2_BUCKET_NAME,
+                f"images/{unique_filename}",
+                ExtraArgs={'ContentType': file.content_type}
+            )
+            return jsonify({'success': True, 'filename': unique_filename})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
 
 @app.route('/api/data/<filename>', methods=['GET'])
 def get_data(filename):

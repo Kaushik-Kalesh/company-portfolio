@@ -46,6 +46,41 @@
     }
   }
 
+  let isUploadingImage = $state(false);
+
+  async function uploadImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    isUploadingImage = true;
+    const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const res = await fetch(`${API_URL}/api/upload-image`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        ontoast?.({ type: 'success', message: 'Image uploaded successfully' });
+        await fetchBucketImages();
+        const current = formImages.split(',').map(i=>i.trim()).filter(Boolean);
+        if (!current.includes(data.filename)) current.push(data.filename);
+        formImages = current.join(', ');
+        showImageSelector = false;
+      } else {
+        ontoast?.({ type: 'error', message: 'Upload failed: ' + data.error });
+      }
+    } catch (err) {
+      ontoast?.({ type: 'error', message: 'Failed to upload image' });
+    } finally {
+      isUploadingImage = false;
+      event.target.value = null;
+    }
+  }
+
   // Form fields
   let formName = $state('');
   let formClient = $state('');
@@ -278,10 +313,21 @@
     </div>
 
     <div class="form-field">
-      <label for="pf-images">Project Images <span class="form-hint">(comma-separated)</span></label>
-      <div style="display:flex; gap:8px;">
-        <input id="pf-images" type="text" bind:value={formImages} placeholder="e.g. img1.png, img2.png" style="flex:1;" />
-        <button type="button" class="btn-outline" onclick={() => { fetchBucketImages(); showImageSelector = true; }}>Choose</button>
+      <label>Project Images</label>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.5rem;">
+        {#each formImages.split(',').map(i=>i.trim()).filter(Boolean) as img}
+          <div style="position: relative; width: 100px; height: 100px; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--color-border);">
+            <img src={`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/images/${img}`} alt="Selected" style="width: 100%; height: 100%; object-fit: cover;" />
+            <button type="button" style="position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border-radius: 50%; background: rgba(0,0,0,0.7); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px;" onclick={() => {
+              const current = formImages.split(',').map(i=>i.trim()).filter(Boolean);
+              formImages = current.filter(i => i !== img).join(', ');
+            }}>✕</button>
+          </div>
+        {/each}
+        <button type="button" class="add-image-btn" onclick={() => { fetchBucketImages(); showImageSelector = true; }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Add Image
+        </button>
       </div>
     </div>
 
@@ -324,7 +370,25 @@
   <div class="overlay" onclick={() => showImageSelector = false}></div>
   <div class="confirm-dialog" style="max-width: 600px; width: 100%;">
     <h3>Select an Image</h3>
-    <p class="pm-subtitle">Click an image to add it to the project.</p>
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <p class="pm-subtitle" style="margin: 0;">Select an image or upload a new one.</p>
+      <div>
+        <input type="file" id="image-upload" accept="image/*" style="display: none;" onchange={uploadImage} disabled={isUploadingImage} />
+        <label for="image-upload" class="btn-primary" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.8rem; border-radius: var(--radius-md); font-size: 0.875rem;">
+          {#if isUploadingImage}
+            <span class="spinner" style="width:12px;height:12px;"></span> Uploading...
+          {:else}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Upload
+          {/if}
+        </label>
+      </div>
+    </div>
     
     <div class="image-grid">
       {#if bucketImages.length === 0}
@@ -476,5 +540,26 @@
     overflow: hidden;
     text-overflow: ellipsis;
     background: rgba(0,0,0,0.2);
+  }
+
+  .add-image-btn {
+    width: 100px;
+    height: 100px;
+    border-radius: var(--radius-md);
+    background: var(--color-elevated);
+    border: 1px dashed var(--color-border);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    transition: border-color 0.2s;
+  }
+  
+  .add-image-btn:hover {
+    border-color: var(--color-accent);
   }
 </style>

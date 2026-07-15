@@ -20,9 +20,6 @@
         {#if tab.badge}
           <span class="tab-badge">{tab.badge}</span>
         {/if}
-        {#if activeTab === tab.id}
-          <div class="tab-indicator"></div>
-        {/if}
       </button>
     {/each}
   </div>
@@ -30,52 +27,57 @@
 
 <style>
   .tab-bar {
-    background: var(--color-surface);
-    border-bottom: 1px solid var(--color-border);
-    padding: 0 1.5rem;
     position: sticky;
-    top: 0;
+    top: 24px;
     z-index: 50;
-    backdrop-filter: blur(12px);
-    background: rgba(26, 26, 26, 0.85);
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+    pointer-events: none;
   }
 
   .tab-bar-inner {
     display: flex;
-    gap: 0.25rem;
-    max-width: 1200px;
-    margin: 0 auto;
+    gap: 4px;
+    background: rgba(20, 20, 20, 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 6px;
+    border-radius: 999px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    pointer-events: auto;
   }
 
   .tab-item {
-    position: relative;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.875rem 1.125rem;
-    background: none;
+    padding: 0.5rem 1.25rem;
+    background: transparent;
     border: none;
     color: var(--color-text-muted);
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
-    border-radius: var(--radius-md) var(--radius-md) 0 0;
-    transition: color var(--transition-fast),
-                background var(--transition-fast);
+    border-radius: 999px;
+    transition: all var(--transition-fast);
     white-space: nowrap;
   }
 
   .tab-item:hover {
     color: var(--color-text);
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.05);
   }
 
   .tab-item:active {
-    transform: none;
+    transform: scale(0.96);
   }
 
   .tab-active {
-    color: var(--color-text);
+    color: white;
+    background: var(--color-accent) !important;
+    box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
   }
 
   .tab-icon {
@@ -90,34 +92,12 @@
   .tab-badge {
     font-size: 0.6875rem;
     font-weight: 600;
-    background: var(--color-accent);
+    background: rgba(255, 255, 255, 0.2);
     color: white;
     padding: 0.0625rem 0.4375rem;
     border-radius: 999px;
     min-width: 18px;
     text-align: center;
     line-height: 1.4;
-  }
-
-  .tab-indicator {
-    position: absolute;
-    bottom: 0;
-    left: 0.75rem;
-    right: 0.75rem;
-    height: 2px;
-    background: var(--color-accent);
-    border-radius: 2px 2px 0 0;
-    animation: tabIndicator 250ms var(--transition-smooth) both;
-  }
-
-  @keyframes tabIndicator {
-    from {
-      transform: scaleX(0);
-      opacity: 0;
-    }
-    to {
-      transform: scaleX(1);
-      opacity: 1;
-    }
   }
 </style>
