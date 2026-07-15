@@ -36,9 +36,7 @@
         </div>
 
         <div class="footer-bottom">
-            <span data-content-id="footer_copyright"
-                >{content.footer_copyright}</span
-            >
+            <span>© {new Date().getFullYear()} {content.companyName}. All rights reserved.</span>
         </div>
     </div>
 </footer>

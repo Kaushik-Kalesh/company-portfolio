@@ -1,17 +1,33 @@
 <script>
-  import portfolioData from '../../../data/portfolio.json';
+  import { onMount } from 'svelte';
   import ProjectCard from './ProjectCard.svelte';
   import EditPanel from './EditPanel.svelte';
 
   let { ontoast } = $props();
 
-  // Reactive state
-  let projects = $state([...portfolioData.map(p => ({ ...p, tags: [...p.tags] }))]);
+  let projects = $state([]);
+  let dataLoaded = $state(false);
+
+  onMount(async () => {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+    try {
+      const res = await fetch(`${API_URL}/api/data/portfolio.json`);
+      if (res.ok) {
+        const data = await res.json();
+        projects = data.map(p => ({ ...p, tags: [...(p.tags || [])] }));
+      }
+    } catch (e) {
+      console.error(e);
+      ontoast?.({ type: 'error', message: 'Failed to load portfolio from server' });
+    }
+    dataLoaded = true;
+  });
 
   // Edit/Add panel state
   let editPanelOpen = $state(false);
   let editMode = $state('add'); // 'add' or 'edit'
   let editingProject = $state(null);
+  let isSaving = $state(false);
 
   // Image selection state
   let bucketImages = $state([]);
@@ -156,6 +172,7 @@
   }
 
   async function saveToServer() {
+    isSaving = true;
     const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
     try {
       const response = await fetch(`${API_URL}/api/portfolio`, {
@@ -166,12 +183,14 @@
       
       const result = await response.json();
       if (result.success) {
-        ontoast?.({ type: 'success', message: 'Saved portfolio to server' });
+        ontoast?.({ type: 'success', message: 'Saved portfolio to server successfully' });
       } else {
         ontoast?.({ type: 'error', message: 'Server error: ' + result.error });
       }
     } catch (err) {
       ontoast?.({ type: 'error', message: 'Failed to connect to server' });
+    } finally {
+      isSaving = false;
     }
   }
 </script>
@@ -185,13 +204,17 @@
         <p class="pm-subtitle">{projects.length} project{projects.length !== 1 ? 's' : ''}</p>
       </div>
       <div class="pm-header-actions">
-        <button class="btn-primary" onclick={saveToServer}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-            <polyline points="17 21 17 13 7 13 7 21"/>
-            <polyline points="7 3 7 8 15 8"/>
-          </svg>
-          Save to Server
+        <button class="btn-primary" onclick={saveToServer} disabled={isSaving}>
+          {#if isSaving}
+            <span class="spinner"></span> Saving...
+          {:else}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+              <polyline points="17 21 17 13 7 13 7 21"/>
+              <polyline points="7 3 7 8 15 8"/>
+            </svg>
+            Save to Server
+          {/if}
         </button>
         <button class="btn-success" onclick={openAddPanel}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -204,8 +227,10 @@
   </div>
 
   <!-- Projects list -->
-  <div class="pm-projects stagger">
-    {#if projects.length > 0}
+  {#if !dataLoaded}
+    <div style="padding: 2rem; text-align: center; color: var(--color-text-dim);">Loading portfolio projects...</div>
+  {:else}
+    <div class="pm-projects stagger">
       {#each projects as project, i (project.id)}
         <ProjectCard
           {project}
@@ -217,14 +242,11 @@
           onMoveDown={moveDown}
         />
       {/each}
-    {:else}
-      <div class="empty-state">
-        <div class="empty-state-icon">📁</div>
-        <h3>No projects yet</h3>
-        <p>Add your first project to get started</p>
-      </div>
-    {/if}
-  </div>
+      {#if projects.length === 0}
+        <div style="padding: 2rem; text-align: center; color: var(--color-text-dim);">No projects found. Add one above!</div>
+      {/if}
+    </div>
+  {/if}
 </div>
 
 <!-- Add/Edit Panel -->
@@ -338,7 +360,20 @@
   }
 
   .pm-header {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
   }
 
   .pm-header-top {

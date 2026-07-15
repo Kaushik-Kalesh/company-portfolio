@@ -1,5 +1,5 @@
 <script>
-  import contentData from '../../../data/content.json';
+  import { onMount } from 'svelte';
   import SearchBar from './SearchBar.svelte';
   import ContentCard from './ContentCard.svelte';
   import EditPanel from './EditPanel.svelte';
@@ -7,12 +7,32 @@
   let { ontoast } = $props();
 
   // Reactive state
-  let content = $state({ ...contentData });
+  let contentData = $state({});
+  let content = $state({});
+  let dataLoaded = $state(false);
   let searchQuery = $state('');
   let editPanelOpen = $state(false);
   let editingKey = $state(null);
   let editValue = $state('');
   let pendingChanges = $state({});
+  let isSaving = $state(false);
+
+  onMount(async () => {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+    try {
+      const res = await fetch(`${API_URL}/api/data/content.json`);
+      if (res.ok) {
+        const data = await res.json();
+        if (!data.companyName) data.companyName = "CPL";
+        contentData = JSON.parse(JSON.stringify(data));
+        content = JSON.parse(JSON.stringify(data));
+      }
+    } catch (e) {
+      console.error(e);
+      ontoast?.({ type: 'error', message: 'Failed to load content from server' });
+    }
+    dataLoaded = true;
+  });
 
   // Derived: content entries as array
   let entries = $derived(Object.entries(content));
@@ -57,6 +77,7 @@
   }
 
   async function saveToServer() {
+    isSaving = true;
     const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
     try {
       const response = await fetch(`${API_URL}/api/content`, {
@@ -68,12 +89,15 @@
       const result = await response.json();
       if (result.success) {
         pendingChanges = {}; // clear pending since saved to server
+        contentData = JSON.parse(JSON.stringify(content)); // Update base truth
         ontoast?.({ type: 'success', message: 'Saved to server successfully' });
       } else {
         ontoast?.({ type: 'error', message: 'Server error: ' + result.error });
       }
     } catch (err) {
       ontoast?.({ type: 'error', message: 'Failed to connect to server' });
+    } finally {
+      isSaving = false;
     }
   }
 
@@ -98,27 +122,35 @@
             Revert All
           </button>
         {/if}
-        <button class="btn-primary" onclick={saveToServer} disabled={pendingCount === 0}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-            <polyline points="17 21 17 13 7 13 7 21"/>
-            <polyline points="7 3 7 8 15 8"/>
-          </svg>
-          Save to Server
-          {#if pendingCount > 0}
-            <span class="pending-badge">{pendingCount}</span>
+        <button class="btn-primary" onclick={saveToServer} disabled={pendingCount === 0 || isSaving}>
+          {#if isSaving}
+            <span class="spinner"></span> Saving...
+          {:else}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+              <polyline points="17 21 17 13 7 13 7 21"/>
+              <polyline points="7 3 7 8 15 8"/>
+            </svg>
+            Save to Server
+            {#if pendingCount > 0}
+              <span class="pending-badge">{pendingCount}</span>
+            {/if}
           {/if}
         </button>
       </div>
     </div>
 
-    <div class="cm-search">
-      <SearchBar
-        bind:value={searchQuery}
-        placeholder="Search by key or value... (e.g. 'hero', 'imagine', 'footer')"
-        onchange={handleSearchChange}
-      />
-    </div>
+    {#if !dataLoaded}
+      <div style="padding: 2rem; text-align: center; color: var(--color-text-dim);">Loading content...</div>
+    {:else}
+      <div class="cm-search">
+        <SearchBar
+          bind:value={searchQuery}
+          placeholder="Search by key or value... (e.g. 'hero', 'imagine', 'footer')"
+          onchange={handleSearchChange}
+        />
+      </div>
+    {/if}
   </div>
 
   <!-- Results info -->
@@ -208,6 +240,19 @@
 
   .cm-header {
     margin-bottom: 1.25rem;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
   }
 
   .cm-header-top {
