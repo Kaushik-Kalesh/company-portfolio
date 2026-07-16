@@ -122,12 +122,37 @@
     font-size: clamp(2.8rem, 7vw, 5.2rem);
     font-weight: 800;
     letter-spacing: -0.045em;
-    line-height: 1.05;
+    line-height: 1.1;
+    padding-bottom: 0.1em; /* Prevent descender cut-off like 'g' */
+    
+    /* Text Gradient & Glow */
+    background: linear-gradient(
+      135deg, 
+      var(--color-fg) 20%, 
+      var(--color-accent) 50%, 
+      var(--color-fg) 80%
+    );
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     color: var(--color-fg);
+    animation: textGradientFlow 12s ease infinite, textGlowPulse 5s ease-in-out infinite alternate;
+    
     max-width: 800px;
     opacity: 0;
     transform: translateY(30px);
     transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.15s;
+  }
+  
+  @keyframes textGradientFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @keyframes textGlowPulse {
+    0% { filter: drop-shadow(0 0 5px rgba(255, 79, 25, 0.05)); }
+    100% { filter: drop-shadow(0 0 15px rgba(255, 79, 25, 0.25)); }
   }
   .hero-headline.visible {
     opacity: 1;
