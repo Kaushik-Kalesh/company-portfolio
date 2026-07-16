@@ -39,7 +39,7 @@ def trigger_vercel():
         urls = VERCEL_WEBHOOK_URL.split(',')
         for url in urls:
             try:
-                requests.post(url.strip())
+                requests.post(url.strip(), timeout=5)
                 print(f"Triggered Vercel rebuild for {url.strip()}")
             except Exception as e:
                 print(f"Failed to trigger Vercel webhook {url.strip()}: {e}")
@@ -171,6 +171,26 @@ def save_portfolio():
     try:
         data = json.dumps(request.json, indent=2)
         s3.put_object(Bucket=R2_BUCKET_NAME, Key='portfolio.json', Body=data, ContentType='application/json')
+        trigger_vercel()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/save-all', methods=['POST'])
+def save_all():
+    if not s3:
+        return jsonify({'error': 'R2 not configured'}), 500
+            
+    try:
+        content_data = request.json.get('content')
+        portfolio_data = request.json.get('portfolio')
+        
+        if content_data is not None:
+            s3.put_object(Bucket=R2_BUCKET_NAME, Key='content.json', Body=json.dumps(content_data, indent=2), ContentType='application/json')
+            
+        if portfolio_data is not None:
+            s3.put_object(Bucket=R2_BUCKET_NAME, Key='portfolio.json', Body=json.dumps(portfolio_data, indent=2), ContentType='application/json')
+            
         trigger_vercel()
         return jsonify({'success': True})
     except Exception as e:

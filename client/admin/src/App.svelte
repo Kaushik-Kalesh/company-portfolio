@@ -18,18 +18,27 @@
     async function saveAllToServer() {
         isSaving = true;
         let success = true;
-        try {
-            if (contentManager) await contentManager.saveToServer();
-        } catch (e) {
-            success = false;
-            addToast({ type: 'error', message: 'Failed to save content: ' + e.message });
-        }
+        const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
         
         try {
-            if (portfolioManager) await portfolioManager.saveToServer();
+            const payload = {
+                content: contentManager ? contentManager.getState() : null,
+                portfolio: portfolioManager ? portfolioManager.getState() : null
+            };
+            
+            const response = await fetch(`${API_URL}/api/save-all`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            const result = await response.json();
+            if (!result.success) throw new Error(result.error);
+            
+            if (contentManager) contentManager.markSaved();
         } catch (e) {
             success = false;
-            addToast({ type: 'error', message: 'Failed to save portfolio: ' + e.message });
+            addToast({ type: 'error', message: 'Failed to save changes: ' + e.message });
         }
 
         if (success) {

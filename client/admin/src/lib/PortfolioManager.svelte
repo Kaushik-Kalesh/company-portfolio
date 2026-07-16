@@ -206,22 +206,8 @@
     }
   }
 
-  export async function saveToServer() {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
-    try {
-      const response = await fetch(`${API_URL}/api/portfolio`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(projects)
-      });
-      
-      const result = await response.json();
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-    } catch (err) {
-      throw err;
-    }
+  export function getState() {
+    return projects;
   }
 </script>
 
