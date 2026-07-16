@@ -91,7 +91,7 @@
         <h2>Admin Access</h2>
         <p class="pin-subtitle">Enter your PIN to manage the website</p>
         
-        <div class="pin-input-group">
+        <div class="pin-input-group" style="margin-bottom: 0;">
             <input 
                 type="password" 
                 bind:value={pinInput} 
@@ -103,11 +103,11 @@
                 style="letter-spacing: 1em; padding-left: 1em;"
             />
         </div>
-        {#if pinError}
-            <p class="error-msg animate-shake">Incorrect PIN</p>
-        {:else}
-            <p class="error-msg" style="visibility: hidden;">Placeholder</p>
-        {/if}
+        <div style="min-height: 1.5rem; margin-top: 0.5rem;">
+            {#if pinError}
+                <p class="error-msg animate-shake" style="margin: 0;">Incorrect PIN</p>
+            {/if}
+        </div>
     </div>
 </div>
 {:else}
@@ -182,7 +182,7 @@
     .global-actions {
         position: fixed;
         bottom: 2rem;
-        right: 2rem;
+        left: 2rem;
         z-index: 100;
         display: flex;
         gap: 0.75rem;
@@ -236,7 +236,7 @@
         background: var(--color-surface);
         border: 1px solid var(--color-border);
         border-radius: var(--radius-lg);
-        padding: 2.5rem;
+        padding: 2.5rem 2.5rem 1.5rem;
         width: 100%;
         max-width: 400px;
         text-align: center;

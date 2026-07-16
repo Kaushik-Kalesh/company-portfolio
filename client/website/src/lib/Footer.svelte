@@ -77,7 +77,7 @@
     }
     
     .logo-img {
-        height: 48px;
+        height: 80px;
         width: auto;
         object-fit: contain;
         display: block;
