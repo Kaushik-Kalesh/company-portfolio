@@ -134,7 +134,7 @@ def handle_contact():
         msg = MIMEMultipart()
         msg['From'] = sender_email
         msg['To'] = 'kaushikkalesh@gmail.com'
-        msg['Subject'] = f"New CPL Contact Request: {reason.capitalize()}"
+        msg['Subject'] = f"New K2MS Contact Request: {reason.capitalize()}"
         
         body = f"You received a new message from your website.\n\nSender Email: {email}\nReason: {reason}\nRemarks:\n{remarks}"
         msg.attach(MIMEText(body, 'plain'))

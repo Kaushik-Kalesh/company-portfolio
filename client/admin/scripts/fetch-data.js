@@ -15,7 +15,7 @@ async function downloadData() {
       const res = await fetch(`${API_URL}/api/data/${file}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      if (file === 'content.json' && !data.companyName) data.companyName = "CPL";
+      if (file === 'content.json' && !data.companyName) data.companyName = "K2MS";
       fs.writeFileSync(path.join(DATA_DIR, file), JSON.stringify(data, null, 2));
       console.log(`Saved ${file}`);
     } catch (e) {

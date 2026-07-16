@@ -23,7 +23,7 @@
       const res = await fetch(`${API_URL}/api/data/content.json`);
       if (res.ok) {
         const data = await res.json();
-        if (!data.companyName) data.companyName = "CPL";
+        if (!data.companyName) data.companyName = "K2MS";
         contentData = JSON.parse(JSON.stringify(data));
         content = JSON.parse(JSON.stringify(data));
       }
