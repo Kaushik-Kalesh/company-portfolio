@@ -6,7 +6,13 @@
     <div class="container">
         <div class="footer-inner">
             <div class="footer-brand">
-                <div class="footer-logo">{content.companyName}</div>
+                <div class="footer-logo">
+                    {#if content.logoUrl}
+                        <img src={content.logoUrl} alt={content.companyName} class="logo-img" />
+                    {:else}
+                        {content.companyName}
+                    {/if}
+                </div>
                 <p class="footer-tagline" data-content-id="footer_tagline">
                     {content.footer_tagline}
                 </p>
@@ -68,6 +74,13 @@
         letter-spacing: -0.04em;
         color: var(--color-fg);
         margin-bottom: 10px;
+    }
+    
+    .logo-img {
+        height: 48px;
+        width: auto;
+        object-fit: contain;
+        display: block;
     }
 
     .footer-tagline {

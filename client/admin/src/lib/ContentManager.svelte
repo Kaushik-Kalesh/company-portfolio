@@ -24,6 +24,8 @@
       if (res.ok) {
         const data = await res.json();
         if (!data.companyName) data.companyName = "K2MS";
+        if (!('logoUrl' in data)) data.logoUrl = "";
+        if (!('ogImageUrl' in data)) data.ogImageUrl = "";
         contentData = JSON.parse(JSON.stringify(data));
         content = JSON.parse(JSON.stringify(data));
       }

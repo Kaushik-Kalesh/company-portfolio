@@ -40,6 +40,9 @@ async function downloadData() {
     if (contentData.metaOgDescription) {
       html = html.replace(/<meta property="og:description" content=".*?"\s*\/>/is, `<meta property="og:description" content="${contentData.metaOgDescription.replace(/"/g, '&quot;')}" />`);
     }
+    if (contentData.ogImageUrl) {
+      html = html.replace(/<meta property="og:image" content=".*?"\s*\/>/is, `<meta property="og:image" content="${contentData.ogImageUrl}" />`);
+    }
     
     fs.writeFileSync(indexPath, html);
     console.log("Injected SEO meta tags into index.html");

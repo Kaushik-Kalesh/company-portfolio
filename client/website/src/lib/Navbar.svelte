@@ -23,7 +23,11 @@
 <nav class="navbar" class:scrolled>
   <div class="navbar-inner">
     <a href="#hero" class="nav-logo" onclick={(e) => { e.preventDefault(); smoothScroll('#hero'); }}>
-      {content.companyName}
+      {#if content.logoUrl}
+        <img src={content.logoUrl} alt={content.companyName} class="logo-img" />
+      {:else}
+        {content.companyName}
+      {/if}
     </a>
 
     <div class="nav-links" class:open={mobileMenuOpen}>
@@ -93,7 +97,14 @@
     color: var(--color-fg);
     text-decoration: none;
     user-select: none;
-    transition: opacity 0.3s ease;
+    transition: all 0.3s ease;
+  }
+
+  .logo-img {
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+    display: block;
   }
 
   .nav-logo:hover {
