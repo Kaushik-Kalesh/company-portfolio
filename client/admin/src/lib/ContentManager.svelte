@@ -73,6 +73,9 @@
   function revertEdit() {
     if (editingKey) {
       editValue = contentData[editingKey];
+    }
+  }
+
   export function getState() {
     return content;
   }

@@ -10,9 +10,10 @@
 </script>
 
 <svelte:head>
-  <title>{content.companyName} — Custom Software & Digital Marketing</title>
-  <meta name="description" content="{content.companyName} builds custom software solutions and delivers digital marketing that scales your business. From CRMs to AI infrastructure — if you can dream it, we can build it." />
-  <meta property="og:title" content="{content.companyName} — Custom Software & Digital Marketing" />
+  <title>{content.metaTitle || content.companyName + ' — Custom Software & Digital Marketing'}</title>
+  <meta name="description" content="{content.metaDescription || content.companyName + ' builds custom software solutions and delivers digital marketing that scales your business. From CRMs to AI infrastructure — if you can dream it, we can build it.'}" />
+  <meta property="og:title" content="{content.metaOgTitle || content.companyName + ' — Custom Software & Digital Marketing'}" />
+  <meta property="og:description" content="{content.metaOgDescription || 'Custom software solutions & digital marketing that scale your business.'}" />
 </svelte:head>
 
 <Navbar />
