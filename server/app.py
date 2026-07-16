@@ -124,28 +124,39 @@ def handle_contact():
     reason = data.get('reason')
     remarks = data.get('remarks')
     
-    sender_email = os.getenv('GMAIL_USER', 'kaushikkalesh@gmail.com')
-    app_password = os.getenv('GMAIL_APP_PASSWORD')
+    resend_api_key = os.getenv('RESEND_API_KEY')
+    to_email = os.getenv('GMAIL_USER', 'kaushikkalesh@gmail.com')
     
-    if not app_password:
-        return jsonify({'error': 'Email configuration missing on server (App Password).'}), 500
+    if not resend_api_key:
+        return jsonify({'error': 'RESEND_API_KEY missing on server.'}), 500
         
     try:
-        msg = MIMEMultipart()
-        msg['From'] = sender_email
-        msg['To'] = 'kaushikkalesh@gmail.com'
-        msg['Subject'] = f"New K2MS Contact Request: {reason.capitalize()}"
+        html_body = f"""
+        <p><strong>From:</strong> {email}</p>
+        <p><strong>Reason:</strong> {reason}</p>
+        <p><strong>Remarks:</strong></p>
+        <p style="white-space: pre-wrap;">{remarks}</p>
+        """
         
-        body = f"You received a new message from your website.\n\nSender Email: {email}\nReason: {reason}\nRemarks:\n{remarks}"
-        msg.attach(MIMEText(body, 'plain'))
+        payload = {
+            "from": "K2MS CRM <onboarding@resend.dev>",
+            "to": [to_email],
+            "reply_to": email,
+            "subject": f"New K2MS Contact Request",
+            "html": html_body
+        }
         
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
-        server.login(sender_email, app_password)
-        server.send_message(msg)
-        server.quit()
+        headers = {
+            "Authorization": f"Bearer {resend_api_key}",
+            "Content-Type": "application/json"
+        }
         
-        return jsonify({'success': True}), 200
+        res = requests.post("https://api.resend.com/emails", json=payload, headers=headers)
+        
+        if res.ok:
+            return jsonify({'success': True}), 200
+        else:
+            raise Exception(f"Resend API Error: {res.text}")
     except Exception as e:
         print(f"Error sending email: {e}")
         return jsonify({'error': str(e)}), 500
