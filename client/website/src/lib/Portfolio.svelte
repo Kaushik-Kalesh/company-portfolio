@@ -340,6 +340,7 @@
     }
 
     .portfolio-card {
+        height: 100%;
         display: flex;
         flex-direction: column;
         gap: 14px;
@@ -403,6 +404,10 @@
         line-height: 1.6;
         flex: 1;
         white-space: pre-wrap;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 
     .project-tags {

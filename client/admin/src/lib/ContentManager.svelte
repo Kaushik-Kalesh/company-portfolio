@@ -4,7 +4,7 @@
   import ContentCard from './ContentCard.svelte';
   import EditPanel from './EditPanel.svelte';
 
-  let { ontoast } = $props();
+  let { ontoast, onchange } = $props();
 
   // Reactive state
   let contentData = $state({});
@@ -69,6 +69,7 @@
       pendingChanges[editingKey] = editValue;
       pendingChanges = { ...pendingChanges }; // trigger reactivity
       ontoast?.({ type: 'success', message: `Updated "${editingKey}"` });
+      onchange?.();
     }
     editPanelOpen = false;
     editingKey = null;
@@ -93,6 +94,7 @@
     content = { ...contentData };
     pendingChanges = {};
     ontoast?.({ type: 'info', message: 'All changes reverted' });
+    onchange?.();
   }
 </script>
 

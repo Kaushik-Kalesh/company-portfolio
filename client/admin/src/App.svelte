@@ -14,6 +14,11 @@
     let portfolioManager;
     let isSaving = $state(false);
     let isRebuilding = $state(false);
+    let hasChanges = $state(false);
+
+    function handleContentChange() {
+        hasChanges = true;
+    }
 
     async function saveAllToServer() {
         isSaving = true;
@@ -42,6 +47,7 @@
         }
 
         if (success) {
+            hasChanges = false;
             addToast({ type: 'success', message: 'All changes saved! Rebuilding site...' });
             isRebuilding = true;
             setTimeout(() => {
@@ -118,10 +124,10 @@
     <!-- Tab content -->
     <main class="app-main">
         <div class="tab-content animate-fade-in" style:display={activeTab === 'content' ? 'block' : 'none'} style="animation-delay: 50ms;">
-            <ContentManager bind:this={contentManager} ontoast={addToast} />
+            <ContentManager bind:this={contentManager} ontoast={addToast} onchange={handleContentChange} />
         </div>
         <div class="tab-content animate-fade-in" style:display={activeTab === 'portfolio' ? 'block' : 'none'} style="animation-delay: 50ms;">
-            <PortfolioManager bind:this={portfolioManager} ontoast={addToast} />
+            <PortfolioManager bind:this={portfolioManager} ontoast={addToast} onchange={handleContentChange} />
         </div>
     </main>
 
@@ -143,7 +149,7 @@
             {/if}
         </a>
 
-        <button class="global-btn btn-primary" onclick={saveAllToServer} disabled={isSaving || isRebuilding}>
+        <button class="global-btn btn-primary" onclick={saveAllToServer} disabled={isSaving || isRebuilding || !hasChanges}>
             {#if isSaving}
                 <span class="spinner"></span> Saving...
             {:else}

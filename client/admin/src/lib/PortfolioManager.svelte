@@ -3,7 +3,7 @@
   import ProjectCard from './ProjectCard.svelte';
   import EditPanel from './EditPanel.svelte';
 
-  let { ontoast } = $props();
+  let { ontoast, onchange } = $props();
 
   let projects = $state([]);
   let dataLoaded = $state(false);
@@ -99,6 +99,7 @@
   let formDescription = $state('');
   let formTags = $state('');
   let formImages = $state('');
+  let formCategory = $state('software');
 
   // Delete confirmation
   let showDeleteConfirm = $state(false);
@@ -111,6 +112,7 @@
     formDescription = '';
     formTags = '';
     formImages = '';
+    formCategory = 'software';
   }
 
   function openAddPanel() {
@@ -127,6 +129,7 @@
     formClient = project.client;
     formLogo = project.logo || '';
     formDescription = project.description;
+    formCategory = project.category || 'software';
     formTags = project.tags.join(', ');
     
     // Support legacy "image" or new "images" array
@@ -152,11 +155,13 @@
         client: formClient.trim(),
         logo: formLogo.trim(),
         description: formDescription.trim(),
+        category: formCategory,
         tags,
         images
       };
       projects = [...projects, newProject];
       ontoast?.({ type: 'success', message: `Added "${formName.trim()}"` });
+      onchange?.();
     } else if (editMode === 'edit' && editingProject) {
       projects = projects.map(p => {
         if (p.id === editingProject.id) {
@@ -166,6 +171,7 @@
             client: formClient.trim(),
             logo: formLogo.trim(),
             description: formDescription.trim(),
+            category: formCategory,
             tags,
             images
           };
@@ -173,6 +179,7 @@
         return p;
       });
       ontoast?.({ type: 'success', message: `Updated "${formName.trim()}"` });
+      onchange?.();
     }
 
     editPanelOpen = false;
@@ -189,6 +196,7 @@
       const name = deletingProject.name;
       projects = projects.filter(p => p.id !== deletingProject.id);
       ontoast?.({ type: 'success', message: `Deleted "${name}"` });
+      onchange?.();
     }
     showDeleteConfirm = false;
     deletingProject = null;
@@ -205,6 +213,7 @@
       const newProjects = [...projects];
       [newProjects[idx - 1], newProjects[idx]] = [newProjects[idx], newProjects[idx - 1]];
       projects = newProjects;
+      onchange?.();
     }
   }
 
@@ -214,6 +223,7 @@
       const newProjects = [...projects];
       [newProjects[idx], newProjects[idx + 1]] = [newProjects[idx + 1], newProjects[idx]];
       projects = newProjects;
+      onchange?.();
     }
   }
 
@@ -295,6 +305,14 @@
     </div>
 
     <div class="form-field">
+      <label for="pf-category">Category</label>
+      <select id="pf-category" bind:value={formCategory}>
+        <option value="software">Custom Software & Tech</option>
+        <option value="marketing">Digital Marketing & SEO</option>
+      </select>
+    </div>
+
+    <div class="form-field">
       <label for="pf-tags">Tags <span class="form-hint">(comma-separated)</span></label>
       <input id="pf-tags" type="text" bind:value={formTags} placeholder="e.g. ERP, Dashboard, Analytics" />
     </div>
@@ -354,8 +372,11 @@
 {#if showImageSelector}
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div class="overlay" onclick={() => showImageSelector = false}></div>
-  <div class="confirm-dialog" style="max-width: 600px; width: 100%;">
+  <div class="overlay" style="z-index: 105;" onclick={() => showImageSelector = false}></div>
+  <div class="confirm-dialog" style="max-width: 600px; width: 100%; z-index: 110;">
+    <button type="button" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; color: var(--color-text-dim); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 4px;" onclick={() => showImageSelector = false}>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
     <h3>Select an Image</h3>
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
