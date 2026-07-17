@@ -6,7 +6,7 @@
   <div class="project-card-header">
     <div class="project-info">
       {#if project.logo}
-        <img src={project.logo} alt={project.name} class="project-logo" />
+        <img src={project.logo.startsWith('http') ? project.logo : `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/images/${project.logo}`} alt={project.name} class="project-logo" />
       {:else}
         <div class="project-logo-placeholder">
           {project.name.charAt(0)}

@@ -102,9 +102,14 @@
                             <div class="card-accent-bar"></div>
 
                             <div class="portfolio-card-header">
-                                <span class="project-client"
-                                    >{project.client}</span
-                                >
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    {#if project.logo}
+                                        <img src={getImageUrl(project.logo)} alt={project.client} style="height: 32px; width: 32px; object-fit: contain; border-radius: 6px;" />
+                                    {/if}
+                                    <span class="project-client"
+                                        >{project.client}</span
+                                    >
+                                </div>
                                 <span class="project-index"
                                     >{String(i + 1).padStart(2, "0")}</span
                                 >
@@ -158,9 +163,14 @@
                             <div class="card-accent-bar"></div>
 
                             <div class="portfolio-card-header">
-                                <span class="project-client"
-                                    >{project.client}</span
-                                >
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    {#if project.logo}
+                                        <img src={getImageUrl(project.logo)} alt={project.client} style="height: 32px; width: 32px; object-fit: contain; border-radius: 6px;" />
+                                    {/if}
+                                    <span class="project-client"
+                                        >{project.client}</span
+                                    >
+                                </div>
                                 <span class="project-index"
                                     >{String(i + 1).padStart(2, "0")}</span
                                 >
@@ -392,13 +402,11 @@
     }
 
     .project-desc {
-        font-size: 0.92rem;
+        font-size: 0.9rem;
+        color: var(--color-text-dim);
         line-height: 1.6;
         flex: 1;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+        white-space: pre-wrap;
     }
 
     .project-tags {
