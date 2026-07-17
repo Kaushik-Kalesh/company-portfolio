@@ -11,10 +11,16 @@
     return () => clearTimeout(timer);
   });
 
-  function smoothScroll(targetId) {
+  import { page } from '$app/stores';
+
+  function smoothScroll(targetId, e) {
+    if ($page.url.pathname !== '/') return;
+    
+    e.preventDefault();
     const el = document.querySelector(targetId);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.history.pushState(null, '', targetId);
     }
   }
 </script>
@@ -36,9 +42,9 @@
 
     <div class="hero-actions" class:visible={ready}>
       <a
-        href="#contact"
+        href="/#contact"
         class="btn btn-primary hero-btn"
-        onclick={(e) => { e.preventDefault(); smoothScroll('#contact'); }}
+        onclick={(e) => smoothScroll('#contact', e)}
       >
         Get in Touch
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -46,9 +52,8 @@
         </svg>
       </a>
       <a
-        href="#portfolio"
+        href="/portfolio"
         class="btn btn-outline hero-btn"
-        onclick={(e) => { e.preventDefault(); smoothScroll('#portfolio'); }}
       >
         Our Work
       </a>

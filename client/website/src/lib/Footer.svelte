@@ -21,9 +21,9 @@
             <div class="footer-links">
                 <div class="footer-col">
                     <h4 class="footer-col-title">Navigate</h4>
-                    <a href="#services" class="footer-link">Services</a>
-                    <a href="#portfolio" class="footer-link">Portfolio</a>
-                    <a href="#contact" class="footer-link">Contact</a>
+                    <a href="/#services" class="footer-link">Services</a>
+                    <a href="/portfolio" class="footer-link">Portfolio</a>
+                    <a href="/#contact" class="footer-link">Contact</a>
                 </div>
 
                 <div class="footer-col">

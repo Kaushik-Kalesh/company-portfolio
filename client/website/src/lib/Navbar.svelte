@@ -11,25 +11,35 @@
     return () => window.removeEventListener('scroll', handleScroll);
   });
 
-  function smoothScroll(targetId) {
+  import { page } from '$app/stores';
+
+  function smoothScroll(targetId, e) {
     mobileMenuOpen = false;
+    
+    // If we are not on the home page, let the browser navigate to /#section naturally
+    if ($page.url.pathname !== '/') return;
+
+    // We are on home page, so intercept and smooth scroll
+    e.preventDefault();
     const el = document.querySelector(targetId);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Update URL hash without jumping
+      window.history.pushState(null, '', targetId);
     }
   }
 </script>
 
 <nav class="navbar" class:scrolled>
   <div class="navbar-inner">
-    <a href="#hero" class="nav-logo" onclick={(e) => { e.preventDefault(); smoothScroll('#hero'); }}>
+    <a href="/#hero" class="nav-logo" onclick={(e) => smoothScroll('#hero', e)}>
       {content.companyName}
     </a>
 
     <div class="nav-links" class:open={mobileMenuOpen}>
-      <a href="#services" class="nav-link" onclick={(e) => { e.preventDefault(); smoothScroll('#services'); }}>Services</a>
-      <a href="#portfolio" class="nav-link" onclick={(e) => { e.preventDefault(); smoothScroll('#portfolio'); }}>Portfolio</a>
-      <a href="#contact" class="nav-link" onclick={(e) => { e.preventDefault(); smoothScroll('#contact'); }}>Contact</a>
+      <a href="/#services" class="nav-link" onclick={(e) => smoothScroll('#services', e)}>Services</a>
+      <a href="/portfolio" class="nav-link" onclick={() => mobileMenuOpen = false}>Portfolio</a>
+      <a href="/#contact" class="nav-link" onclick={(e) => smoothScroll('#contact', e)}>Contact</a>
     </div>
 
     <button

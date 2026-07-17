@@ -37,6 +37,12 @@
     const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
     return img.startsWith('http') ? img : `${API_URL}/images/${img}`;
   }
+
+  const softwareKeywords = ['software', 'app', 'web', 'system', 'platform', 'bot', 'dashboard', 'crm', 'ai', 'cloud', 'tech'];
+  
+  // Categorize projects
+  const softwareProjects = portfolio.filter(p => p.category === 'software' || (!p.category && p.tags.some(t => softwareKeywords.some(kw => t.toLowerCase().includes(kw)))));
+  const marketingProjects = portfolio.filter(p => !softwareProjects.includes(p));
 </script>
 
 <section id="portfolio" class="section portfolio-section">
@@ -48,38 +54,79 @@
       </div>
     </ScrollReveal>
 
-    <div class="portfolio-grid">
-      {#each portfolio as project, i}
-        <ScrollReveal delay={i * 140}>
-          <!-- svelte-ignore a11y_click_events_have_key_events -->
-          <!-- svelte-ignore a11y_no_static_element_interactions -->
-          <div class="card portfolio-card" data-project-id={project.id} onclick={() => openProject(project)}>
-            <!-- Accent line -->
-            <div class="card-accent-bar"></div>
+    <!-- Software Projects -->
+    {#if softwareProjects.length > 0}
+      <h3 class="category-title">Custom Software & Tech</h3>
+      <div class="portfolio-grid">
+        {#each softwareProjects as project, i}
+          <ScrollReveal delay={i * 100}>
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
+            <div class="card portfolio-card" data-project-id={project.id} onclick={() => openProject(project)}>
+              <!-- Accent line -->
+              <div class="card-accent-bar"></div>
 
-            <div class="portfolio-card-header">
-              <span class="project-client">{project.client}</span>
-              <span class="project-index">{String(i + 1).padStart(2, '0')}</span>
+              <div class="portfolio-card-header">
+                <span class="project-client">{project.client}</span>
+                <span class="project-index">{String(i + 1).padStart(2, '0')}</span>
+              </div>
+
+              <h3 class="project-name">{project.name}</h3>
+              <p class="project-desc">{project.description}</p>
+
+              <div class="project-tags">
+                {#each project.tags as tag}
+                  <span class="tag">{tag}</span>
+                {/each}
+              </div>
+
+              <div class="project-arrow">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 17L17 7M17 7H7M17 7v10"/>
+                </svg>
+              </div>
             </div>
+          </ScrollReveal>
+        {/each}
+      </div>
+    {/if}
 
-            <h3 class="project-name">{project.name}</h3>
-            <p class="project-desc">{project.description}</p>
+    <!-- Marketing Projects -->
+    {#if marketingProjects.length > 0}
+      <h3 class="category-title" style="margin-top: 64px;">Digital Marketing & SEO</h3>
+      <div class="portfolio-grid">
+        {#each marketingProjects as project, i}
+          <ScrollReveal delay={i * 100}>
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
+            <div class="card portfolio-card" data-project-id={project.id} onclick={() => openProject(project)}>
+              <!-- Accent line -->
+              <div class="card-accent-bar"></div>
 
-            <div class="project-tags">
-              {#each project.tags as tag}
-                <span class="tag">{tag}</span>
-              {/each}
+              <div class="portfolio-card-header">
+                <span class="project-client">{project.client}</span>
+                <span class="project-index">{String(i + 1).padStart(2, '0')}</span>
+              </div>
+
+              <h3 class="project-name">{project.name}</h3>
+              <p class="project-desc">{project.description}</p>
+
+              <div class="project-tags">
+                {#each project.tags as tag}
+                  <span class="tag">{tag}</span>
+                {/each}
+              </div>
+
+              <div class="project-arrow">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 17L17 7M17 7H7M17 7v10"/>
+                </svg>
+              </div>
             </div>
-
-            <div class="project-arrow">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M7 17L17 7M17 7H7M17 7v10"/>
-              </svg>
-            </div>
-          </div>
-        </ScrollReveal>
-      {/each}
-    </div>
+          </ScrollReveal>
+        {/each}
+      </div>
+    {/if}
   </div>
 </section>
 
@@ -150,6 +197,13 @@
   .portfolio-header p {
     max-width: 520px;
     margin: 0 auto;
+  }
+
+  .category-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    letter-spacing: -0.02em;
   }
 
   .portfolio-grid {

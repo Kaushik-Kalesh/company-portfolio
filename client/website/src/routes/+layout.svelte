@@ -1,12 +1,11 @@
 <script>
-  import Navbar from './lib/Navbar.svelte';
-  import Hero from './lib/Hero.svelte';
-  import Services from './lib/Services.svelte';
-  import Portfolio from './lib/Portfolio.svelte';
-  import Contact from './lib/Contact.svelte';
-  import Footer from './lib/Footer.svelte';
-  import WhatsAppFab from './lib/WhatsAppFab.svelte';
-  import content from '../../data/content.json';
+  import '../app.css';
+  import Navbar from '../lib/Navbar.svelte';
+  import Footer from '../lib/Footer.svelte';
+  import WhatsAppFab from '../lib/WhatsAppFab.svelte';
+  import content from '../../../data/content.json';
+
+  let { children } = $props();
 </script>
 
 <svelte:head>
@@ -26,19 +25,7 @@
 </div>
 
 <main>
-  <Hero />
-
-  <hr class="dashed-separator" />
-
-  <Services />
-
-  <hr class="dashed-separator" />
-
-  <Portfolio />
-
-  <hr class="dashed-separator" />
-
-  <Contact />
+  {@render children()}
 </main>
 
 <Footer />

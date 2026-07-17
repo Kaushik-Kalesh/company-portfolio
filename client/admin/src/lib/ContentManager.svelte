@@ -26,6 +26,8 @@
         if (!data.companyName) data.companyName = "K2MS";
         if (!('logoUrl' in data)) data.logoUrl = "";
         if (!('ogImageUrl' in data)) data.ogImageUrl = "";
+        if (!data.service_infra_title) data.service_infra_title = "Cloud & Infrastructure";
+        if (!data.service_infra_desc) data.service_infra_desc = "We handle everything from domain purchasing and DNS setup to fully managed cloud infrastructure. Our team handles server deployments and containerization so you can focus on building your product.";
         contentData = JSON.parse(JSON.stringify(data));
         content = JSON.parse(JSON.stringify(data));
       }

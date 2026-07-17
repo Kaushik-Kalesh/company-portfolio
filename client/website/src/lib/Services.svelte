@@ -18,6 +18,11 @@
       descKey: 'service_both_desc',
       icon: 'rocket',
     },
+    {
+      titleKey: 'service_infra_title',
+      descKey: 'service_infra_desc',
+      icon: 'server',
+    },
   ];
 
   const iconPaths = {
@@ -51,9 +56,16 @@
                   <path d="M3 11l18-5v12L3 14v-3z"></path>
                   <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path>
                 </svg>
-              {:else}
+              {:else if service.icon === 'rocket'}
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M6 12L3.269 3.126A59.768 59.768 0 0 1 21.485 12 59.77 59.77 0 0 1 3.27 20.876L5.999 12zm0 0h7.5"></path>
+                </svg>
+              {:else}
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                  <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                  <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                  <line x1="6" y1="18" x2="6.01" y2="18"></line>
                 </svg>
               {/if}
             </div>
@@ -90,7 +102,7 @@
 
   .services-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 24px;
   }
 
@@ -148,6 +160,12 @@
   }
 
   @media (max-width: 900px) {
+    .services-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 600px) {
     .services-grid {
       grid-template-columns: 1fr;
       max-width: 500px;
