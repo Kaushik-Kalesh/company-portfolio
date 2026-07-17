@@ -45,6 +45,7 @@
 
 <style>
   .scroll-reveal {
+    height: 100%;
     opacity: 0;
     transform: var(--reveal-transform, translateY(40px));
     transition:

@@ -49,36 +49,43 @@
   let isUploadingImage = $state(false);
 
   async function uploadImage(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
     isUploadingImage = true;
     const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
-    const formData = new FormData();
-    formData.append('image', file);
+    let successCount = 0;
 
-    try {
-      const res = await fetch(`${API_URL}/api/upload-image`, {
-        method: 'POST',
-        body: formData
-      });
-      const data = await res.json();
-      if (data.success) {
-        ontoast?.({ type: 'success', message: 'Image uploaded successfully' });
-        await fetchBucketImages();
-        const current = formImages.split(',').map(i=>i.trim()).filter(Boolean);
-        if (!current.includes(data.filename)) current.push(data.filename);
-        formImages = current.join(', ');
-        showImageSelector = false;
-      } else {
-        ontoast?.({ type: 'error', message: 'Upload failed: ' + data.error });
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+        const res = await fetch(`${API_URL}/api/upload-image`, {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          successCount++;
+          let current = formImages.split(',').map(i=>i.trim()).filter(Boolean);
+          if (!current.includes(data.filename)) current.push(data.filename);
+          formImages = current.join(', ');
+        }
+      } catch (err) {
+        console.error('Failed to upload image', err);
       }
-    } catch (err) {
-      ontoast?.({ type: 'error', message: 'Failed to upload image' });
-    } finally {
-      isUploadingImage = false;
-      event.target.value = null;
     }
+    
+    if (successCount > 0) {
+      ontoast?.({ type: 'success', message: `Successfully uploaded ${successCount} image(s)` });
+      await fetchBucketImages();
+    } else {
+      ontoast?.({ type: 'error', message: 'Failed to upload images' });
+    }
+    
+    isUploadingImage = false;
+    event.target.value = null;
   }
 
   // Form fields
@@ -344,7 +351,7 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
       <p class="pm-subtitle" style="margin: 0;">Select an image or upload a new one.</p>
       <div>
-        <input type="file" id="image-upload" accept="image/*" style="display: none;" onchange={uploadImage} disabled={isUploadingImage} />
+        <input type="file" id="image-upload" accept="image/*" multiple style="display: none;" onchange={uploadImage} disabled={isUploadingImage} />
         <label for="image-upload" class="btn-primary" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.8rem; border-radius: var(--radius-md); font-size: 0.875rem;">
           {#if isUploadingImage}
             <span class="spinner" style="width:12px;height:12px;"></span> Uploading...
@@ -366,12 +373,16 @@
       {/if}
       {#each bucketImages as img}
         <div 
-          class="image-item" 
+          class="image-item"
+          class:selected={formImages.split(',').map(i=>i.trim()).filter(Boolean).includes(img)}
           onclick={() => { 
-            const current = formImages.split(',').map(i=>i.trim()).filter(Boolean);
-            if (!current.includes(img)) current.push(img);
+            let current = formImages.split(',').map(i=>i.trim()).filter(Boolean);
+            if (current.includes(img)) {
+              current = current.filter(i => i !== img);
+            } else {
+              current.push(img);
+            }
             formImages = current.join(', ');
-            showImageSelector = false; 
           }}
         >
           <img src={`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/images/${img}`} alt={img} />
@@ -381,7 +392,7 @@
     </div>
     
     <div class="confirm-dialog-actions" style="margin-top: 16px;">
-      <button class="btn-secondary" onclick={() => showImageSelector = false}>Cancel</button>
+      <button class="btn-primary" onclick={() => showImageSelector = false}>Done</button>
     </div>
   </div>
 {/if}
@@ -488,11 +499,33 @@
     overflow: hidden;
     background: var(--color-surface);
     transition: all 0.2s;
+    position: relative;
   }
 
   .image-item:hover {
     border-color: var(--color-primary);
     transform: translateY(-2px);
+  }
+
+  .image-item.selected {
+    border-color: var(--color-primary);
+  }
+
+  .image-item.selected::after {
+    content: "✓";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--color-primary);
+    color: var(--color-bg);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
   }
 
   .image-item img {
