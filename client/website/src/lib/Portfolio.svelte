@@ -300,10 +300,7 @@
                 </div>
 
                 <div class="modal-desc">
-                    <p>
-                        {activeProject.longDescription ||
-                            activeProject.description}
-                    </p>
+                    {activeProject.longDescription || activeProject.description}
                 </div>
             </div>
         </div>
@@ -343,7 +340,6 @@
     }
 
     .portfolio-card {
-        height: 100%;
         display: flex;
         flex-direction: column;
         gap: 14px;
@@ -607,6 +603,7 @@
         font-size: 1.05rem;
         line-height: 1.7;
         color: var(--color-fg-muted);
+        white-space: pre-wrap;
     }
 
     @keyframes fadeIn {
