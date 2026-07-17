@@ -173,7 +173,7 @@
                             quickly.
                         </p>
                         <a
-                            href="https://wa.me/918015777932"
+                            href="https://wa.me/917845299722?text=Hi"
                             target="_blank"
                             rel="noopener noreferrer"
                             class="btn btn-accent whatsapp-btn"

@@ -8,7 +8,11 @@
             <div class="footer-brand">
                 <div class="footer-logo">
                     {#if content.logoUrl}
-                        <img src={content.logoUrl} alt={content.companyName} class="logo-img" />
+                        <img
+                            src={content.logoUrl}
+                            alt={content.companyName}
+                            class="logo-img"
+                        />
                     {:else}
                         {content.companyName}
                     {/if}
@@ -29,7 +33,7 @@
                 <div class="footer-col">
                     <h4 class="footer-col-title">Connect</h4>
                     <a
-                        href="https://wa.me/918015777932"
+                        href="https://wa.me/917845299722?text=Hi"
                         target="_blank"
                         rel="noopener noreferrer"
                         class="footer-link">WhatsApp</a
@@ -42,7 +46,10 @@
         </div>
 
         <div class="footer-bottom">
-            <span>© {new Date().getFullYear()} {content.companyName}. All rights reserved.</span>
+            <span
+                >© {new Date().getFullYear()}
+                {content.companyName}. All rights reserved.</span
+            >
         </div>
     </div>
 </footer>
@@ -75,7 +82,7 @@
         color: var(--color-fg);
         margin-bottom: 10px;
     }
-    
+
     .logo-img {
         height: 80px;
         width: auto;
