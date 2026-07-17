@@ -68,9 +68,13 @@
         const data = await res.json();
         if (data.success) {
           successCount++;
-          let current = formImages.split(',').map(i=>i.trim()).filter(Boolean);
-          if (!current.includes(data.filename)) current.push(data.filename);
-          formImages = current.join(', ');
+          if (showImageSelector === 'logo') {
+            formLogo = data.filename;
+          } else {
+            let current = formImages.split(',').map(i=>i.trim()).filter(Boolean);
+            if (!current.includes(data.filename)) current.push(data.filename);
+            formImages = current.join(', ');
+          }
         }
       } catch (err) {
         console.error('Failed to upload image', err);
@@ -275,8 +279,14 @@
     </div>
 
     <div class="form-field">
-      <label for="pf-logo">Logo URL</label>
-      <input id="pf-logo" type="text" bind:value={formLogo} placeholder="https://..." />
+      <label for="pf-logo">Logo</label>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <input id="pf-logo" type="text" bind:value={formLogo} placeholder="Filename or URL..." style="flex: 1;" />
+        <button type="button" class="btn-secondary" style="padding: 0.75rem 1rem;" onclick={() => { fetchBucketImages(); showImageSelector = 'logo'; }}>Browse</button>
+      </div>
+      {#if formLogo}
+        <img src={formLogo.startsWith('http') ? formLogo : `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/images/${formLogo}`} alt="Logo preview" style="height: 40px; width: fit-content; object-fit: contain; margin-top: 0.5rem; border-radius: 4px; background: rgba(0,0,0,0.1); padding: 4px;" />
+      {/if}
     </div>
 
     <div class="form-field">
@@ -301,7 +311,7 @@
             }}>✕</button>
           </div>
         {/each}
-        <button type="button" class="add-image-btn" onclick={() => { fetchBucketImages(); showImageSelector = true; }}>
+        <button type="button" class="add-image-btn" onclick={() => { fetchBucketImages(); showImageSelector = 'images'; }}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
           Add Image
         </button>
@@ -374,15 +384,20 @@
       {#each bucketImages as img}
         <div 
           class="image-item"
-          class:selected={formImages.split(',').map(i=>i.trim()).filter(Boolean).includes(img)}
+          class:selected={showImageSelector === 'logo' ? formLogo === img : formImages.split(',').map(i=>i.trim()).filter(Boolean).includes(img)}
           onclick={() => { 
-            let current = formImages.split(',').map(i=>i.trim()).filter(Boolean);
-            if (current.includes(img)) {
-              current = current.filter(i => i !== img);
+            if (showImageSelector === 'logo') {
+              formLogo = img;
+              showImageSelector = false;
             } else {
-              current.push(img);
+              let current = formImages.split(',').map(i=>i.trim()).filter(Boolean);
+              if (current.includes(img)) {
+                current = current.filter(i => i !== img);
+              } else {
+                current.push(img);
+              }
+              formImages = current.join(', ');
             }
-            formImages = current.join(', ');
           }}
         >
           <img src={`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/images/${img}`} alt={img} />
@@ -392,7 +407,7 @@
     </div>
     
     <div class="confirm-dialog-actions" style="margin-top: 16px;">
-      <button class="btn-primary" onclick={() => showImageSelector = false}>Done</button>
+      <button class="btn-primary" onclick={() => showImageSelector = false}>{showImageSelector === 'logo' ? 'Cancel' : 'Done'}</button>
     </div>
   </div>
 {/if}
