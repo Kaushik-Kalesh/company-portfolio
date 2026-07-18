@@ -234,10 +234,17 @@
             {#if activeProject.images?.length > 0 || activeProject.image}
                 {@const images = activeProject.images || [activeProject.image]}
                 <div class="modal-image-container">
+                    <!-- svelte-ignore a11y_click_events_have_key_events -->
+                    <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
                     <img
                         src={getImageUrl(images[currentImageIndex])}
                         alt={activeProject.name}
                         class="modal-image"
+                        style="cursor: zoom-in;"
+                        onclick={(e) => {
+                            e.stopPropagation();
+                            window.open(getImageUrl(images[currentImageIndex]), '_blank');
+                        }}
                     />
 
                     {#if images.length > 1}
@@ -290,6 +297,16 @@
             <div class="modal-body">
                 <div class="portfolio-card-header">
                     <span class="project-client">{activeProject.client}</span>
+                    {#if activeProject.url}
+                        <a href={activeProject.url} target="_blank" rel="noopener noreferrer" class="project-url-link" onclick={(e) => e.stopPropagation()}>
+                            Visit Project
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                        </a>
+                    {/if}
                 </div>
                 <h3 class="modal-title">{activeProject.name}</h3>
 
@@ -381,6 +398,27 @@
         letter-spacing: 0.06em;
         text-transform: uppercase;
         color: var(--color-accent);
+    }
+
+    .project-url-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--color-text);
+        text-decoration: none;
+        padding: 6px 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .project-url-link:hover {
+        background: var(--color-accent);
+        color: var(--color-bg);
+        border-color: var(--color-accent);
     }
 
     .project-index {

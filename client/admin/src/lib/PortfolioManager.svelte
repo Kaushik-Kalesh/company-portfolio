@@ -97,6 +97,7 @@
   let formClient = $state('');
   let formLogo = $state('');
   let formDescription = $state('');
+  let formUrl = $state('');
   let formTags = $state('');
   let formImages = $state('');
   let formCategory = $state('software');
@@ -110,6 +111,7 @@
     formClient = '';
     formLogo = '';
     formDescription = '';
+    formUrl = '';
     formTags = '';
     formImages = '';
     formCategory = 'software';
@@ -129,6 +131,7 @@
     formClient = project.client;
     formLogo = project.logo || '';
     formDescription = project.description;
+    formUrl = project.url || '';
     formCategory = project.category || 'software';
     formTags = project.tags.join(', ');
     
@@ -155,6 +158,7 @@
         client: formClient.trim(),
         logo: formLogo.trim(),
         description: formDescription.trim(),
+        url: formUrl.trim(),
         category: formCategory,
         tags,
         images
@@ -171,6 +175,7 @@
             client: formClient.trim(),
             logo: formLogo.trim(),
             description: formDescription.trim(),
+            url: formUrl.trim(),
             category: formCategory,
             tags,
             images
@@ -302,6 +307,11 @@
     <div class="form-field">
       <label for="pf-desc">Description</label>
       <textarea id="pf-desc" bind:value={formDescription} rows="4" placeholder="Describe the project..."></textarea>
+    </div>
+
+    <div class="form-field">
+      <label for="pf-url">Project URL (Optional)</label>
+      <input id="pf-url" type="url" bind:value={formUrl} placeholder="https://..." />
     </div>
 
     <div class="form-field">
